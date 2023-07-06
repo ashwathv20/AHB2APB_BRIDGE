@@ -1,0 +1,15 @@
+vsim work.top_tb
+# vsim work.top_tb 
+# Start time: 13:33:07 on Jun 29,2023
+# Loading work.top_tb
+# Loading work.ahb_master
+# Loading work.bridge_top
+# Loading work.ahb_slave_interface
+# Loading work.apb_controller
+# Loading work.apb_interface
+add wave -position insertpoint sim:/top_tb/*
+run -all
+# Break key hit
+# Simulation stop requested.
+# End time: 13:36:13 on Jun 29,2023, Elapsed time: 0:03:06
+# Errors: 0, Warnings: 1

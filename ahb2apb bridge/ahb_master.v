@@ -1,0 +1,205 @@
+module ahb_master (input hclk,hresetn, hreadyout, input [31:0] hrdata, input [1:0] hresp,
+output reg [31:0] haddr, hwdata, output reg hwrite,hreadyin, output reg [1:0] htrans);
+reg [2:0] hburst;
+reg [2:0] hsize;
+integer i;
+task single_write();
+
+begin
+@(posedge hclk);
+#1; 
+begin
+hwrite=1;
+htrans=2'b10;
+hsize=0;
+hburst=0;
+hreadyin=1;
+haddr=32'h8000_0001;
+end
+@(posedge hclk);
+#1;
+begin
+htrans=2'b00;
+hwdata=8'h80;
+end
+end
+endtask
+
+task single_read();
+
+begin
+@(posedge hclk);
+#1;
+begin
+hwrite=0;
+htrans=2'b10;
+hsize=0;
+hburst=0;
+hreadyin=1;
+haddr=32'h8000_0001;
+end
+@(posedge hclk);
+#1;
+begin
+htrans=2'b00;
+end
+end
+endtask
+
+task burst_4_inc_write();
+begin
+@(posedge hclk)
+#1;
+begin
+hwrite=1;
+htrans=2'd2;
+hsize=0;
+hburst=0;
+haddr=32'h8000_0000;
+hreadyin=1;
+end
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+hwdata={$random}%256;
+htrans=2'd3;
+end
+//@(posedge hclk)
+for(i=0;i<2;i=i+1)
+begin
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+hwdata={$random}%256;
+htrans=2'd3;
+end
+@(posedge hclk)
+//@(posedge hclk)
+#1;
+begin
+hwdata={$random}%256;
+htrans=2'd0;
+end
+end
+end
+endtask
+
+task burst_4_wrap_write();
+begin
+@(posedge hclk)
+#1;
+begin
+hwrite=1;
+htrans=2'd2;
+hsize=0;
+hburst=0;
+haddr=32'h8000_0000;
+hreadyin=1;
+end
+
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+hwdata={$random}%256;
+htrans=2'd3;
+end
+//@(posedge hclk)
+for(i=0;i<2;i=i+1)
+begin
+@(posedge hclk)
+#1;
+begin
+haddr={haddr[31:0],haddr[1:0]+1'b1};
+hwdata={$random}%256;
+htrans=2'd3;
+end
+@(posedge hclk)
+//@(posedge hclk)
+#1;
+begin
+hwdata={$random}%256;
+htrans=2'd0;
+end
+end
+end
+endtask
+
+task burst_4_inc_read();
+begin
+@(posedge hclk)
+#1;
+begin
+hwrite=0;
+htrans=2'd2;
+hsize=0;
+hburst=0;
+haddr=32'h8000_0000;
+hreadyin=1;
+end
+
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+htrans=2'd3;
+end
+//@(posedge hclk)
+for(i=0;i<2;i=i+1)
+begin
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+htrans=2'd3;
+end
+@(posedge hclk)
+//@(posedge hclk)
+#1;
+begin
+htrans=2'd0;
+end
+end
+end
+endtask
+
+task burst_4_wrap_read();
+begin
+@(posedge hclk)
+#1;
+begin
+hwrite=0;
+htrans=2'd2;
+hsize=0;
+hburst=0;
+haddr=32'h8000_0000;
+hreadyin=1;
+end
+
+@(posedge hclk)
+#1;
+begin
+haddr=haddr+1;
+htrans=2'd3;
+end
+//@(posedge hclk)
+for(i=0;i<2;i=i+1)
+begin
+@(posedge hclk)
+#1;
+begin
+haddr={haddr[31:0],haddr[1:0]+1'b1};
+htrans=2'd3;
+end
+@(posedge hclk)
+//@(posedge hclk)
+#1;
+begin
+htrans=2'd0;
+end
+end
+end
+endtask
+endmodule
